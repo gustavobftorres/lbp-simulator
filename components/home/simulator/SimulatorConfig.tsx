@@ -107,14 +107,14 @@ export function SimulatorConfig() {
                 </Button>
                 <div className="flex-1 space-y-2">
                   <Label className="text-xs">
-                    Duration: {config.duration} Days
+                    Duration: {config.duration} Hours
                   </Label>
                   <Slider
                     value={[config.duration]}
                     onValueChange={(vals) =>
                       updateConfig({ duration: vals[0] })
                     }
-                    max={90}
+                    max={2160}
                     step={1}
                     className="w-full"
                   />

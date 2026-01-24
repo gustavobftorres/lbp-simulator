@@ -52,7 +52,7 @@ const DEFAULT_CONFIG: LBPConfig = {
   tknWeightOut: 10,
   usdcWeightOut: 90,
   startDelay: 0,
-  duration: 3, // 3 days (72h)
+  duration: 72, // 72 hours (3 days)
 };
 
 const TOTAL_STEPS = 300; // Granularity of simulation
@@ -169,7 +169,7 @@ export const useSimulatorStore = create<SimulatorState>((set, get) => ({
 
     // Record Bid
     const newBid: Bid = {
-      time: `Day ${stepData.time.toFixed(1)}`,
+      time: `${stepData.time.toFixed(1)}h`,
       account: `0x${Math.floor(Math.random() * 16777215).toString(16)}...`,
       amountIn: amountUSDC,
       amountOut: amountOut,

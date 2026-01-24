@@ -13,13 +13,13 @@ export interface LBPConfig {
   tknWeightOut: number; // Final Token weight (e.g. 10)
   usdcWeightOut: number; // Final USDC weight (e.g. 90)
   startDelay: number; // Delay before start (in blocks/time)
-  duration: number; // Duration of LBP (in blocks/time)
+  duration: number; // Duration of LBP (in hours)
   swapFee?: number; // Swap fee (e.g., 0.01 for 1%)
 }
 
 export interface SimulationStep {
   time: number;
-  timeLabel: string; // e.g., "Day 1"
+  timeLabel: string; // e.g., "Hour 1"
   price: number;
   tknWeight: number;
   usdcWeight: number;
@@ -65,7 +65,7 @@ export function calculateOutGivenIn(
 /**
  * Generates a demand curve (Fair Value) based on time
  */
-export function getDemandCurve(days: number, steps: number): number[] {
+export function getDemandCurve(hours: number, steps: number): number[] {
   const curve = [];
   const basePrice = 0.5; // Start
   const endPrice = 0.1; // End
@@ -117,7 +117,7 @@ export function calculateSimulationData(
 
     data.push({
       time,
-      timeLabel: `Day ${time.toFixed(1)}`,
+      timeLabel: `${time.toFixed(1)}h`,
       price,
       tknWeight: currentTknWeight,
       usdcWeight: currentUsdcWeight,
