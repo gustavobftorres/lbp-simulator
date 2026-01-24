@@ -137,11 +137,11 @@ export function BidForm() {
     setInputAmount("");
   };
 
-  const isValidAmount = inputAmount && parseFloat(inputAmount) > 0;
-  const hasInsufficientBalance = isValidAmount && (
+  const isValidAmount = Boolean(inputAmount && parseFloat(inputAmount) > 0);
+  const hasInsufficientBalance = isValidAmount ? (
     (direction === "buy" && parseFloat(inputAmount) > userUsdcBalance) ||
     (direction === "sell" && parseFloat(inputAmount) > userTknBalance)
-  );
+  ) : false;
 
   const inputToken = direction === "buy" ? "USDC" : config.tokenSymbol;
   const outputToken = direction === "buy" ? config.tokenSymbol : "USDC";
