@@ -10,25 +10,17 @@ export function SimulatorHeader() {
     useSimulatorStore();
 
   const timeRemaining = useMemo(() => {
-    // config.duration is in Days
-    // progress = currentStep / (totalSteps)
-    // remaining = duration * (1 - progress)
-    // Let's assume simulationData is the source of truth for "Time"
-    // But wait, step 0 is t=0.
-    // duration is total days.
-    // We can just calculate directly from step count/total if we expose totalSteps,
-    // or look at the last datapoint time vs current datapoint time
-
+    // config.duration is in Hours
     if (!simulationData || simulationData.length === 0) return "00:00:00";
     const endStep = simulationData[simulationData.length - 1];
     const currentStepData = simulationData[currentStep] || simulationData[0];
 
-    const totalDurationDays = config.duration;
-    const currentDay = currentStepData.time;
-    const remainingDays = Math.max(0, totalDurationDays - currentDay);
+    const totalDurationHours = config.duration;
+    const currentHour = currentStepData.time;
+    const remainingHours = Math.max(0, totalDurationHours - currentHour);
 
-    // Convert days to HH:MM:SS
-    const totalSeconds = remainingDays * 24 * 60 * 60;
+    // Convert hours to HH:MM:SS
+    const totalSeconds = remainingHours * 60 * 60;
     const h = Math.floor(totalSeconds / 3600);
     const m = Math.floor((totalSeconds % 3600) / 60);
     const s = Math.floor(totalSeconds % 60);

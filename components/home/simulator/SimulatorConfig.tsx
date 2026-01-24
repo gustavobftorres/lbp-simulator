@@ -107,14 +107,14 @@ export function SimulatorConfig() {
                 </Button>
                 <div className="flex-1 space-y-2">
                   <Label className="text-xs">
-                    Duration: {config.duration} Days
+                    Duration: {config.duration} Hours
                   </Label>
                   <Slider
                     value={[config.duration]}
                     onValueChange={(vals) =>
                       updateConfig({ duration: vals[0] })
                     }
-                    max={90}
+                    max={2160}
                     step={1}
                     className="w-full"
                   />
@@ -194,6 +194,30 @@ export function SimulatorConfig() {
                       updateConfig({ usdcBalanceIn: Number(e.target.value) })
                     }
                   />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Creator Fee</Label>
+                  <Select
+                    value={String(config.creatorFee || 5)}
+                    onValueChange={(value) =>
+                      updateConfig({ creatorFee: Number(value) })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select creator fee" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((fee) => (
+                        <SelectItem key={fee} value={String(fee)}>
+                          {fee}%
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    Balancer fee is always 10%. Creator fee can be set from 1% to 10%.
+                  </p>
                 </div>
               </div>
 
