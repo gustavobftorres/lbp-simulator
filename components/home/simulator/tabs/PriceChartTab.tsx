@@ -31,10 +31,10 @@ function PriceChartTabComponent({
 
   return (
     <>
-      <ResponsiveContainer width="100%" height="100%" className="pb-8">
+      <ResponsiveContainer width="100%" height="95%">
         <LineChart
           data={chartData}
-          margin={{ top: 10, right: 30, left: 0, bottom: 60 }}
+          margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
         >
           <CartesianGrid
             strokeDasharray="3 3"
@@ -141,10 +141,6 @@ function PriceChartTabComponent({
           />
         </LineChart>
       </ResponsiveContainer>
-      <div className="absolute bottom-2 right-4 text-xs text-muted-foreground font-mono">
-        Steps: {simulationData.length} | Price: $
-        {simulationData[simulationData.length - 1]?.price.toFixed(4)}
-      </div>
     </>
   );
 }

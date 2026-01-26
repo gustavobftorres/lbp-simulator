@@ -213,19 +213,6 @@ function BidFormComponent() {
             >
               <TokenLogo token={inputToken} size={24} />
               <span className="font-medium">{inputToken}</span>
-              <svg
-                className="h-4 w-4 text-muted-foreground"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
             </Button>
           </div>
         </div>
@@ -282,19 +269,6 @@ function BidFormComponent() {
             >
               <TokenLogo token={outputToken} size={24} />
               <span className="font-medium">{outputToken}</span>
-              <svg
-                className="h-4 w-4 text-slate-700"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
             </Button>
           </div>
         </div>

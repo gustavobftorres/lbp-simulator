@@ -17,16 +17,19 @@ interface DemandChartTabProps {
   shouldAnimate: boolean;
 }
 
-function DemandChartTabComponent({ chartData, shouldAnimate }: DemandChartTabProps) {
+function DemandChartTabComponent({
+  chartData,
+  shouldAnimate,
+}: DemandChartTabProps) {
   const { resolvedTheme } = useTheme();
   const axisLabelColor = resolvedTheme === "dark" ? "#b3b3b3" : "#6b7280";
 
   return (
     <>
-      <ResponsiveContainer width="100%" height="100%">
+      <ResponsiveContainer width="100%" height="90%">
         <LineChart
           data={chartData}
-          margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+          margin={{ top: 10, right: 30, left: 0, bottom: 50 }}
         >
           <CartesianGrid
             strokeDasharray="3 3"
@@ -53,7 +56,7 @@ function DemandChartTabComponent({ chartData, shouldAnimate }: DemandChartTabPro
           <Line
             type="monotone"
             dataKey="price"
-            stroke="#4f46e5"
+            stroke="url(#demand-pressure-gradient)"
             strokeWidth={2}
             dot={false}
             name="price"
@@ -63,7 +66,7 @@ function DemandChartTabComponent({ chartData, shouldAnimate }: DemandChartTabPro
           <Line
             type="monotone"
             dataKey="fairValue"
-            stroke="#10b981" // emerald
+            stroke="#2f2f2f"
             strokeWidth={2}
             strokeDasharray="5 5"
             dot={false}
@@ -73,9 +76,9 @@ function DemandChartTabComponent({ chartData, shouldAnimate }: DemandChartTabPro
           />
         </LineChart>
       </ResponsiveContainer>
-      <div className="text-center mt-2 text-xs text-muted-foreground">
-        Green dotted line represents Market "Fair Value". If Price
-        (Blue) drops below, Bots buy.
+      <div className="text-center mt-2 text-xs text-muted-foreground mt-0 ">
+        Green dotted line represents Market "Fair Value". If Price (Blue) drops
+        below, Bots buy.
       </div>
     </>
   );

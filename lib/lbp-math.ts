@@ -5,7 +5,7 @@ export interface LBPConfig {
   tokenSymbol: string;
   totalSupply: number;
   percentForSale: number;
-  collateralToken: CollateralToken; // Collateral token for the LBP
+  collateralToken: CollateralToken;
 
   // LBP Params
   tknBalanceIn: number; // Token balance (derived, but kept for calculation)
@@ -84,21 +84,49 @@ export function calculateOutGivenIn(
 }
 
 /**
- * Generates a demand curve (Fair Value price) based on time
+ * Generates a demand curve (Fair Value price) based on LBP weight changes
  * This represents the "fair value" price that market participants expect
+ * Price changes hyperbolically based on weight ratio (price ∝ 1/weight)
  */
-export function getDemandCurve(hours: number, steps: number): number[] {
+export function getDemandCurve(
+  hours: number,
+  steps: number,
+  initialWeight?: number,
+  finalWeight?: number,
+  initialPrice?: number,
+): number[] {
   const curve = [];
-  const basePrice = 0.5; // Start
-  const endPrice = 0.1; // End
 
-  // Simulate "Market Consensus" dropping over time as hype fades or finding true value
+  const initialWeightDecimal =
+    initialWeight !== undefined
+      ? initialWeight > 1
+        ? initialWeight / 100
+        : initialWeight
+      : 0.95; // Default 95%
+  const finalWeightDecimal =
+    finalWeight !== undefined
+      ? finalWeight > 1
+        ? finalWeight / 100
+        : finalWeight
+      : 0.5; // Default 50%
+  const basePrice = initialPrice ?? 0.5;
+
   for (let i = 0; i <= steps; i++) {
     const progress = i / steps;
-    // Exponential decay of "Fair Value" expectation till it hits floor
-    const fairValue = basePrice * Math.exp(-2 * progress) + endPrice;
-    curve.push(fairValue);
+
+    // Weight changes linearly over time
+    const currentWeight =
+      initialWeightDecimal -
+      (initialWeightDecimal - finalWeightDecimal) * progress;
+
+    // Price changes hyperbolically based on weight ratio
+    // When collateral is constant: price ∝ 1/weight
+    const weightRatio = initialWeightDecimal / currentWeight;
+    const price = basePrice / weightRatio;
+
+    curve.push(price);
   }
+
   return curve;
 }
 
@@ -269,7 +297,9 @@ export function calculatePotentialPricePaths(
       // Simulate expected buy volume for this step
       // Higher demand = more buying = price goes up
       const expectedBuyVolume =
-        baseVolume * demandPressureConfig.baseTradeSize * adjustedDemandPressure;
+        baseVolume *
+        demandPressureConfig.baseTradeSize *
+        adjustedDemandPressure;
 
       // Apply buys to simulate price impact
       if (expectedBuyVolume > 0 && currentPrice < fairPrice) {

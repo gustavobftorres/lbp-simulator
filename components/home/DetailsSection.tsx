@@ -2,7 +2,6 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { HowItWorksTab } from "./details/HowItWorksTab";
-import { TokenOverviewTab } from "./details/TokenOverviewTab";
 import { ProjectDetailsTab } from "./details/ProjectDetailsTab";
 import SaleDetailsTabComponent from "./details/SaleDetailsTab";
 
@@ -25,12 +24,6 @@ export function DetailsSection() {
               How the LBP Works
             </TabsTrigger>
             <TabsTrigger
-              value="token"
-              className="rounded-none border-b-2 border-transparent data-[state=active]:shadow-none px-3 sm:px-4 py-3 text-sm sm:text-base whitespace-nowrap"
-            >
-              Token Overview
-            </TabsTrigger>
-            <TabsTrigger
               value="project"
               className="rounded-none border-b-2 border-transparent data-[state=active]:shadow-none px-3 sm:px-4 py-3 text-sm sm:text-base whitespace-nowrap"
             >
@@ -43,9 +36,6 @@ export function DetailsSection() {
           </TabsContent>
           <TabsContent value="how-it-works">
             <HowItWorksTab />
-          </TabsContent>
-          <TabsContent value="token">
-            <TokenOverviewTab />
           </TabsContent>
           <TabsContent value="project">
             <ProjectDetailsTab />
