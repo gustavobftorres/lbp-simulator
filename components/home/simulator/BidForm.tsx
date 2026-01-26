@@ -9,8 +9,9 @@ import { useShallow } from "zustand/react/shallow";
 import { calculateOutGivenIn } from "@/lib/lbp-math";
 import { ArrowUpDown, Wallet } from "lucide-react";
 import { toast } from "@/components/ui/toast";
+import { TokenLogo } from "@/components/ui/TokenLogo";
 
-type SwapDirection = "buy" | "sell"; // buy = USDC -> Token, sell = Token -> USDC
+type SwapDirection = "buy" | "sell"; // buy = Collateral -> Token, sell = Token -> Collateral
 
 function BidFormComponent() {
   const {
@@ -50,7 +51,7 @@ function BidFormComponent() {
 
     const amount = parseFloat(inputAmount);
     if (direction === "buy") {
-      // Buying token with USDC
+      // Buying token with collateral
       return calculateOutGivenIn(
         currentUsdcBalance,
         stepData.usdcWeight,
@@ -59,7 +60,7 @@ function BidFormComponent() {
         amount,
       );
     } else {
-      // Selling token for USDC
+      // Selling token for collateral
       return calculateOutGivenIn(
         currentTknBalance,
         stepData.tknWeight,
@@ -102,7 +103,7 @@ function BidFormComponent() {
     if (direction === "buy") {
       if (amount > userUsdcBalance) {
         alert(
-          `Insufficient USDC balance. You have ${userUsdcBalance.toLocaleString()} USDC.`,
+          `Insufficient ${config.collateralToken} balance. You have ${userUsdcBalance.toLocaleString()} ${config.collateralToken}.`,
         );
         return;
       }
@@ -121,7 +122,7 @@ function BidFormComponent() {
       // Show toast notification
       toast({
         title: `Bought ${config.tokenSymbol}`,
-        description: `You bought ${amountOut.toLocaleString(undefined, { maximumFractionDigits: 2 })} ${config.tokenSymbol} for ${amount.toLocaleString(undefined, { maximumFractionDigits: 2 })} USDC`,
+        description: `You bought ${amountOut.toLocaleString(undefined, { maximumFractionDigits: 2 })} ${config.tokenSymbol} for ${amount.toLocaleString(undefined, { maximumFractionDigits: 2 })} ${config.collateralToken}`,
         duration: 5000,
       });
     } else {
@@ -146,7 +147,7 @@ function BidFormComponent() {
       // Show toast notification
       toast({
         title: `Sold ${config.tokenSymbol}`,
-        description: `You sold ${amount.toLocaleString(undefined, { maximumFractionDigits: 2 })} ${config.tokenSymbol} for ${amountOut.toLocaleString(undefined, { maximumFractionDigits: 2 })} USDC`,
+        description: `You sold ${amount.toLocaleString(undefined, { maximumFractionDigits: 2 })} ${config.tokenSymbol} for ${amountOut.toLocaleString(undefined, { maximumFractionDigits: 2 })} ${config.collateralToken}`,
         duration: 5000,
       });
     }
@@ -159,8 +160,8 @@ function BidFormComponent() {
       (direction === "sell" && parseFloat(inputAmount) > userTknBalance)
     : false;
 
-  const inputToken = direction === "buy" ? "USDC" : config.tokenSymbol;
-  const outputToken = direction === "buy" ? config.tokenSymbol : "USDC";
+  const inputToken = direction === "buy" ? config.collateralToken : config.tokenSymbol;
+  const outputToken = direction === "buy" ? config.tokenSymbol : config.collateralToken;
   const inputBalance = direction === "buy" ? userUsdcBalance : userTknBalance;
   const outputBalance = direction === "buy" ? userTknBalance : userUsdcBalance;
 
@@ -210,9 +211,7 @@ function BidFormComponent() {
               variant="outline"
               className="flex items-center gap-2 px-3 py-2 h-auto"
             >
-              <div className="h-6 w-6 rounded-full bg-muted flex items-center justify-center text-xs font-semibold">
-                {inputToken === "USDC" ? "U" : config.tokenSymbol[0]}
-              </div>
+              <TokenLogo token={inputToken} size={24} />
               <span className="font-medium">{inputToken}</span>
               <svg
                 className="h-4 w-4 text-muted-foreground"
@@ -281,9 +280,7 @@ function BidFormComponent() {
               variant="outline"
               className="flex items-center gap-2 px-3 py-2 h-auto bg-gradient-to-r from-blue-300 via-purple-300 to-orange-300 hover:from-blue-400 hover:via-purple-400 hover:to-orange-400 text-slate-900 border-0"
             >
-              <div className="h-6 w-6 rounded-full bg-slate-700 flex items-center justify-center text-xs font-semibold text-white">
-                {outputToken === "USDC" ? "U" : config.tokenSymbol[0]}
-              </div>
+              <TokenLogo token={outputToken} size={24} />
               <span className="font-medium">{outputToken}</span>
               <svg
                 className="h-4 w-4 text-slate-700"
@@ -307,7 +304,7 @@ function BidFormComponent() {
           <div className="flex justify-between">
             <span>Price:</span>
             <span className="font-medium text-foreground">
-              ${currentPrice.toFixed(4)} {config.tokenSymbol}/USDC
+              ${currentPrice.toFixed(4)} {config.tokenSymbol}/{config.collateralToken}
             </span>
           </div>
         </div>

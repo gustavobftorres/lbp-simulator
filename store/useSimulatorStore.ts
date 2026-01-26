@@ -67,6 +67,7 @@ const DEFAULT_CONFIG: LBPConfig = {
   tokenSymbol: "ACME",
   totalSupply: 100_000_000,
   percentForSale: 50,
+  collateralToken: "USDC",
 
   tknBalanceIn: 50_000_000, // 50% of 100M
   tknWeightIn: 90,

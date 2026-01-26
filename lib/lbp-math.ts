@@ -1,8 +1,11 @@
+export type CollateralToken = "USDC" | "ETH" | "wETH";
+
 export interface LBPConfig {
   tokenName: string;
   tokenSymbol: string;
   totalSupply: number;
   percentForSale: number;
+  collateralToken: CollateralToken; // Collateral token for the LBP
 
   // LBP Params
   tknBalanceIn: number; // Token balance (derived, but kept for calculation)

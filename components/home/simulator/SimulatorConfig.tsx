@@ -243,6 +243,25 @@ export function SimulatorConfig() {
                 </div>
 
                 <div className="space-y-2">
+                  <Label>Collateral Token</Label>
+                  <Select
+                    value={config.collateralToken}
+                    onValueChange={(value) =>
+                      updateConfig({ collateralToken: value as "USDC" | "ETH" | "wETH" })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select collateral token" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="USDC">USDC</SelectItem>
+                      <SelectItem value="ETH">ETH</SelectItem>
+                      <SelectItem value="wETH">wETH</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
                   <Label>Total Supply</Label>
                   <Input
                     type="number"
