@@ -14,19 +14,27 @@ import { DemandChartTab } from "./tabs/DemandChartTab";
 import { WeightsChartTab } from "./tabs/WeightsChartTab";
 
 function SimulatorMainComponent() {
-  const { simulationData, swaps, demandCurve, config, currentStep, simulationSpeed, demandPressureConfig, isPlaying } =
-    useSimulatorStore(
-      useShallow((state) => ({
-        simulationData: state.simulationData,
-        swaps: state.swaps,
-        demandCurve: state.demandCurve,
-        config: state.config,
-        currentStep: state.currentStep,
-        simulationSpeed: state.simulationSpeed,
-        demandPressureConfig: state.demandPressureConfig,
-        isPlaying: state.isPlaying,
-      })),
-    );
+  const {
+    simulationData,
+    swaps,
+    demandCurve,
+    config,
+    currentStep,
+    simulationSpeed,
+    demandPressureConfig,
+    isPlaying,
+  } = useSimulatorStore(
+    useShallow((state) => ({
+      simulationData: state.simulationData,
+      swaps: state.swaps,
+      demandCurve: state.demandCurve,
+      config: state.config,
+      currentStep: state.currentStep,
+      simulationSpeed: state.simulationSpeed,
+      demandPressureConfig: state.demandPressureConfig,
+      isPlaying: state.isPlaying,
+    })),
+  );
 
   // Throttle chart data updates during simulation to reduce rendering overhead
   // Sample data points during simulation for better performance
@@ -35,7 +43,9 @@ function SimulatorMainComponent() {
       return simulationData;
     }
     // During simulation, sample every 5th point to reduce rendering load
-    return simulationData.filter((_, index) => index % 5 === 0 || index === simulationData.length - 1);
+    return simulationData.filter(
+      (_, index) => index % 5 === 0 || index === simulationData.length - 1,
+    );
   }, [simulationData, isPlaying]);
 
   // Throttle chart data updates during simulation
@@ -128,7 +138,9 @@ function SimulatorMainComponent() {
                 />
               </svg>
               <p className="text-xs text-emerald-800 dark:text-emerald-200">
-                <span className="font-semibold">Dynamic price:</span> Decays with time, rises with demand. Dotted lines show potential price paths based on different demand scenarios.
+                <span className="font-semibold">Dynamic price:</span> Decays
+                with time, rises with demand. Dotted lines show potential price
+                paths based on different demand scenarios.
               </p>
             </div>
             <TabsContent value="chart" className="mt-0 h-[calc(100%-2rem)]">

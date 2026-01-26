@@ -32,7 +32,10 @@ function PriceChartTabComponent({
   return (
     <>
       <ResponsiveContainer width="100%" height="100%" className="pb-8">
-        <LineChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 60 }}>
+        <LineChart
+          data={chartData}
+          margin={{ top: 10, right: 30, left: 0, bottom: 60 }}
+        >
           <CartesianGrid
             strokeDasharray="3 3"
             vertical={false}
@@ -73,7 +76,11 @@ function PriceChartTabComponent({
             }}
           />
           <Legend
-            wrapperStyle={{ paddingTop: "20px", paddingBottom: "10px", fontSize: "12px" }}
+            wrapperStyle={{
+              paddingTop: "20px",
+              paddingBottom: "10px",
+              fontSize: "12px",
+            }}
             iconType="line"
             formatter={(value) => {
               const labels: Record<string, string> = {
@@ -124,10 +131,10 @@ function PriceChartTabComponent({
           <Line
             type="monotone"
             dataKey="price"
-            stroke="#10b981" // emerald-500 (green)
+            stroke="url(#demand-pressure-gradient)"
             strokeWidth={2}
             dot={false}
-            activeDot={{ r: 6, fill: "#10b981" }}
+            activeDot={{ r: 6, fill: "url(#demand-pressure-gradient)" }}
             isAnimationActive={shouldAnimate}
             animationDuration={shouldAnimate ? 300 : 0}
             name="price"

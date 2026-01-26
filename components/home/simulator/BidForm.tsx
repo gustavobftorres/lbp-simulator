@@ -13,20 +13,29 @@ import { toast } from "@/components/ui/toast";
 type SwapDirection = "buy" | "sell"; // buy = USDC -> Token, sell = Token -> USDC
 
 function BidFormComponent() {
-  const { config, currentStep, simulationData, currentTknBalance, currentUsdcBalance, processBuy, processSell, userTknBalance, userUsdcBalance } =
-    useSimulatorStore(
-      useShallow((state) => ({
-        config: state.config,
-        currentStep: state.currentStep,
-        simulationData: state.simulationData,
-        currentTknBalance: state.currentTknBalance,
-        currentUsdcBalance: state.currentUsdcBalance,
-        processBuy: state.processBuy,
-        processSell: state.processSell,
-        userTknBalance: state.userTknBalance,
-        userUsdcBalance: state.userUsdcBalance,
-      })),
-    );
+  const {
+    config,
+    currentStep,
+    simulationData,
+    currentTknBalance,
+    currentUsdcBalance,
+    processBuy,
+    processSell,
+    userTknBalance,
+    userUsdcBalance,
+  } = useSimulatorStore(
+    useShallow((state) => ({
+      config: state.config,
+      currentStep: state.currentStep,
+      simulationData: state.simulationData,
+      currentTknBalance: state.currentTknBalance,
+      currentUsdcBalance: state.currentUsdcBalance,
+      processBuy: state.processBuy,
+      processSell: state.processSell,
+      userTknBalance: state.userTknBalance,
+      userUsdcBalance: state.userUsdcBalance,
+    })),
+  );
 
   const [direction, setDirection] = useState<SwapDirection>("buy");
   const [inputAmount, setInputAmount] = useState<string>("");
@@ -92,10 +101,12 @@ function BidFormComponent() {
     const amount = parseFloat(inputAmount);
     if (direction === "buy") {
       if (amount > userUsdcBalance) {
-        alert(`Insufficient USDC balance. You have ${userUsdcBalance.toLocaleString()} USDC.`);
+        alert(
+          `Insufficient USDC balance. You have ${userUsdcBalance.toLocaleString()} USDC.`,
+        );
         return;
       }
-      
+
       // Calculate output before processing (for toast)
       const amountOut = calculateOutGivenIn(
         currentUsdcBalance,
@@ -104,9 +115,9 @@ function BidFormComponent() {
         stepData.tknWeight,
         amount,
       );
-      
+
       processBuy(amount);
-      
+
       // Show toast notification
       toast({
         title: `Bought ${config.tokenSymbol}`,
@@ -115,10 +126,12 @@ function BidFormComponent() {
       });
     } else {
       if (amount > userTknBalance) {
-        alert(`Insufficient ${config.tokenSymbol} balance. You have ${userTknBalance.toLocaleString()} ${config.tokenSymbol}.`);
+        alert(
+          `Insufficient ${config.tokenSymbol} balance. You have ${userTknBalance.toLocaleString()} ${config.tokenSymbol}.`,
+        );
         return;
       }
-      
+
       // Calculate output before processing (for toast)
       const amountOut = calculateOutGivenIn(
         currentTknBalance,
@@ -127,9 +140,9 @@ function BidFormComponent() {
         stepData.usdcWeight,
         amount,
       );
-      
+
       processSell(amount);
-      
+
       // Show toast notification
       toast({
         title: `Sold ${config.tokenSymbol}`,
@@ -141,10 +154,10 @@ function BidFormComponent() {
   };
 
   const isValidAmount = Boolean(inputAmount && parseFloat(inputAmount) > 0);
-  const hasInsufficientBalance = isValidAmount ? (
-    (direction === "buy" && parseFloat(inputAmount) > userUsdcBalance) ||
-    (direction === "sell" && parseFloat(inputAmount) > userTknBalance)
-  ) : false;
+  const hasInsufficientBalance = isValidAmount
+    ? (direction === "buy" && parseFloat(inputAmount) > userUsdcBalance) ||
+      (direction === "sell" && parseFloat(inputAmount) > userTknBalance)
+    : false;
 
   const inputToken = direction === "buy" ? "USDC" : config.tokenSymbol;
   const outputToken = direction === "buy" ? config.tokenSymbol : "USDC";
@@ -163,7 +176,11 @@ function BidFormComponent() {
             <span className="text-sm text-muted-foreground">You pay</span>
             <div className="flex items-center gap-1 text-xs text-muted-foreground">
               <Wallet className="h-3 w-3" />
-              <span>{inputBalance.toLocaleString(undefined, { maximumFractionDigits: 2 })}</span>
+              <span>
+                {inputBalance.toLocaleString(undefined, {
+                  maximumFractionDigits: 2,
+                })}
+              </span>
               <Button
                 variant="link"
                 onClick={handleMax}
@@ -183,7 +200,10 @@ function BidFormComponent() {
                 className="text-2xl font-semibold border-0 p-0 h-auto focus-visible:ring-0 bg-transparent dark:bg-transparent shadow-none"
               />
               <div className="text-sm text-muted-foreground mt-1">
-                ${inputUsdValue.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                $
+                {inputUsdValue.toLocaleString(undefined, {
+                  maximumFractionDigits: 2,
+                })}
               </div>
             </div>
             <Button
@@ -234,18 +254,27 @@ function BidFormComponent() {
             <span className="text-sm text-muted-foreground">You receive</span>
             <div className="flex items-center gap-1 text-xs text-muted-foreground">
               <Wallet className="h-3 w-3" />
-              <span>{outputBalance.toLocaleString(undefined, { maximumFractionDigits: 2 })}</span>
+              <span>
+                {outputBalance.toLocaleString(undefined, {
+                  maximumFractionDigits: 2,
+                })}
+              </span>
             </div>
           </div>
           <div className="flex items-center gap-2 p-4 border border-border rounded-lg bg-background">
             <div className="flex-1">
               <div className="text-2xl font-semibold">
                 {outputAmount > 0
-                  ? outputAmount.toLocaleString(undefined, { maximumFractionDigits: 6 })
+                  ? outputAmount.toLocaleString(undefined, {
+                      maximumFractionDigits: 6,
+                    })
                   : "0.00"}
               </div>
               <div className="text-sm text-muted-foreground mt-1">
-                ${outputUsdValue.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                $
+                {outputUsdValue.toLocaleString(undefined, {
+                  maximumFractionDigits: 2,
+                })}
               </div>
             </div>
             <Button
@@ -297,7 +326,9 @@ function BidFormComponent() {
           className="w-full bg-gradient-to-r from-blue-200 via-purple-200 to-orange-200 hover:from-blue-300 hover:via-purple-300 hover:to-orange-300 text-slate-900 font-semibold rounded-xl px-6 h-11 disabled:opacity-50 disabled:cursor-not-allowed"
           size="lg"
         >
-          {direction === "buy" ? `Buy ${config.tokenSymbol}` : `Sell ${config.tokenSymbol}`}
+          {direction === "buy"
+            ? `Buy ${config.tokenSymbol}`
+            : `Sell ${config.tokenSymbol}`}
         </Button>
 
         <p className="text-xs text-center text-muted-foreground">

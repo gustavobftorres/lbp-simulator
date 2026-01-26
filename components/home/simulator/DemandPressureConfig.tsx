@@ -16,23 +16,36 @@ import { RotateCcw, TrendingUp } from "lucide-react";
 import { useSimulatorStore } from "@/store/useSimulatorStore";
 import { DEFAULT_DEMAND_PRESSURE_CONFIG } from "@/lib/lbp-math";
 import { Separator } from "@/components/ui/separator";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 import { useMemo, useState, useEffect } from "react";
-import { getDemandPressureCurve, DemandPressureConfig as DemandPressureConfigType } from "@/lib/lbp-math";
+import {
+  getDemandPressureCurve,
+  DemandPressureConfig as DemandPressureConfigType,
+} from "@/lib/lbp-math";
 import { useDebounce } from "@/lib/useDebounce";
 import { useShallow } from "zustand/react/shallow";
 
 export function DemandPressureConfig() {
-  const { demandPressureConfig, updateDemandPressureConfig, config } = useSimulatorStore(
-    useShallow((state) => ({
-      demandPressureConfig: state.demandPressureConfig,
-      updateDemandPressureConfig: state.updateDemandPressureConfig,
-      config: state.config,
-    })),
-  );
+  const { demandPressureConfig, updateDemandPressureConfig, config } =
+    useSimulatorStore(
+      useShallow((state) => ({
+        demandPressureConfig: state.demandPressureConfig,
+        updateDemandPressureConfig: state.updateDemandPressureConfig,
+        config: state.config,
+      })),
+    );
 
   // Local state for immediate UI updates
-  const [localConfig, setLocalConfig] = useState<DemandPressureConfigType>(demandPressureConfig);
+  const [localConfig, setLocalConfig] =
+    useState<DemandPressureConfigType>(demandPressureConfig);
 
   // Update local state when store config changes (e.g., reset)
   useEffect(() => {
@@ -45,7 +58,8 @@ export function DemandPressureConfig() {
   // Update store when debounced config changes
   useEffect(() => {
     // Deep comparison to avoid unnecessary updates
-    const configsEqual = JSON.stringify(debouncedConfig) === JSON.stringify(demandPressureConfig);
+    const configsEqual =
+      JSON.stringify(debouncedConfig) === JSON.stringify(demandPressureConfig);
     if (!configsEqual) {
       updateDemandPressureConfig(debouncedConfig);
     }
@@ -79,7 +93,9 @@ export function DemandPressureConfig() {
       </DialogTrigger>
       <DialogContent className="max-w-2xl h-[90vh] max-h-[90vh] p-0 gap-0 flex flex-col overflow-hidden">
         <DialogHeader className="p-6 border-b flex flex-row items-center justify-between space-y-0 shrink-0">
-          <DialogTitle className="text-xl font-semibold">Demand Pressure Model</DialogTitle>
+          <DialogTitle className="text-xl font-semibold">
+            Demand Pressure Model
+          </DialogTitle>
           <Button
             variant="ghost"
             size="sm"
@@ -98,30 +114,37 @@ export function DemandPressureConfig() {
               <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
                 Preview
               </h3>
-              <div className="h-[200px] border rounded-md p-4">
+              <div className="h-[250px] border rounded-md p-4">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={previewData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.4} />
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      stroke="hsl(var(--border))"
+                      opacity={0.4}
+                    />
                     <XAxis
                       dataKey="time"
-                      stroke="hsl(var(--muted-foreground))"
+                      stroke={
+                        typeof window !== "undefined" &&
+                        document.documentElement.classList.contains("dark")
+                          ? "#505050"
+                          : "hsl(var(--muted-foreground))"
+                      }
                       fontSize={10}
                       tickFormatter={(val) => `${val.toFixed(0)}h`}
                     />
-                    <YAxis
-                      domain={[0, 100]}
-                      stroke="hsl(var(--muted-foreground))"
-                      fontSize={10}
-                      tickFormatter={(val) => `${val}%`}
-                    />
                     <Tooltip
-                      formatter={(value: number | undefined) => value != null ? `${value.toFixed(1)}%` : ""}
-                      labelFormatter={(label) => `Time: ${Number(label).toFixed(1)}h`}
+                      formatter={(value: number | undefined) =>
+                        value != null ? `${value.toFixed(1)}%` : ""
+                      }
+                      labelFormatter={(label) =>
+                        `Time: ${Number(label).toFixed(1)}h`
+                      }
                     />
                     <Line
                       type="monotone"
                       dataKey="intensity"
-                      stroke="#4f46e5"
+                      stroke="url(#demand-pressure-gradient)"
                       strokeWidth={2}
                       dot={false}
                     />
@@ -148,7 +171,10 @@ export function DemandPressureConfig() {
                 <Slider
                   value={[localConfig.baseIntensity]}
                   onValueChange={(vals) =>
-                    setLocalConfig((prev) => ({ ...prev, baseIntensity: vals[0] }))
+                    setLocalConfig((prev) => ({
+                      ...prev,
+                      baseIntensity: vals[0],
+                    }))
                   }
                   min={0}
                   max={1}
@@ -156,7 +182,8 @@ export function DemandPressureConfig() {
                   className="w-full"
                 />
                 <p className="text-xs text-muted-foreground">
-                  Maximum trading intensity at the end of the sale (when price finds fair value)
+                  Maximum trading intensity at the end of the sale (when price
+                  finds fair value)
                 </p>
               </div>
 
@@ -170,7 +197,10 @@ export function DemandPressureConfig() {
                 <Slider
                   value={[localConfig.floorIntensity]}
                   onValueChange={(vals) =>
-                    setLocalConfig((prev) => ({ ...prev, floorIntensity: vals[0] }))
+                    setLocalConfig((prev) => ({
+                      ...prev,
+                      floorIntensity: vals[0],
+                    }))
                   }
                   min={0}
                   max={1}
@@ -178,7 +208,8 @@ export function DemandPressureConfig() {
                   className="w-full"
                 />
                 <p className="text-xs text-muted-foreground">
-                  Minimum trading intensity at the start (high price prevents front-running)
+                  Minimum trading intensity at the start (high price prevents
+                  front-running)
                 </p>
               </div>
 
@@ -200,7 +231,8 @@ export function DemandPressureConfig() {
                   className="w-full"
                 />
                 <p className="text-xs text-muted-foreground">
-                  How fast trading intensity grows over time (square root curve steepness)
+                  How fast trading intensity grows over time (square root curve
+                  steepness)
                 </p>
               </div>
             </div>
@@ -223,7 +255,10 @@ export function DemandPressureConfig() {
                 <Slider
                   value={[localConfig.priceDiscountMultiplier]}
                   onValueChange={(vals) =>
-                    setLocalConfig((prev) => ({ ...prev, priceDiscountMultiplier: vals[0] }))
+                    setLocalConfig((prev) => ({
+                      ...prev,
+                      priceDiscountMultiplier: vals[0],
+                    }))
                   }
                   min={0.5}
                   max={3}
@@ -241,7 +276,10 @@ export function DemandPressureConfig() {
                   type="number"
                   value={localConfig.baseTradeSize}
                   onChange={(e) =>
-                    setLocalConfig((prev) => ({ ...prev, baseTradeSize: Number(e.target.value) }))
+                    setLocalConfig((prev) => ({
+                      ...prev,
+                      baseTradeSize: Number(e.target.value),
+                    }))
                   }
                 />
                 <p className="text-xs text-muted-foreground">
@@ -259,7 +297,10 @@ export function DemandPressureConfig() {
                 <Slider
                   value={[localConfig.tradeSizeVariation]}
                   onValueChange={(vals) =>
-                    setLocalConfig((prev) => ({ ...prev, tradeSizeVariation: vals[0] }))
+                    setLocalConfig((prev) => ({
+                      ...prev,
+                      tradeSizeVariation: vals[0],
+                    }))
                   }
                   min={1}
                   max={5}
