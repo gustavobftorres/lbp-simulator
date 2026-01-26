@@ -30,6 +30,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Background3D } from "@/components/ui/Background3D";
 import { Toaster } from "@/components/ui/toast";
 import { PlayPauseButton } from "@/components/ui/PlayPauseButton";
+import { SvgDefinitions } from "@/components/ui/SvgDefinitions";
 
 export default function RootLayout({
   children,
@@ -48,6 +49,7 @@ export default function RootLayout({
           disableTransitionOnChange
           storageKey="vite-ui-theme"
         >
+        <SvgDefinitions />
         <Background3D />
           {children}
           <Toaster />

@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/select";
 import { Settings, Play, Pause, RotateCcw, Plus, Trash2 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 import { useSimulatorStore } from "@/store/useSimulatorStore";
 import { DemandPressureConfig } from "./DemandPressureConfig";
 import { useState, useEffect } from "react";
@@ -152,16 +153,16 @@ export function SimulatorConfig() {
                   Timeline
                 </h3>
                 <div className="flex items-center gap-2">
-                  {/* Status indicators placeholder - kept purely visual for now */}
-                  <div className="flex bg-muted rounded-md p-1">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-6 px-2 text-xs rounded-sm bg-background shadow-sm text-foreground"
-                    >
-                      Active
-                    </Button>
-                  </div>
+                  <Badge
+                    variant="outline"
+                    className={
+                      isPlaying
+                        ? "bg-gradient-to-r from-blue-300 via-purple-300 to-orange-300 hover:from-blue-400 hover:via-purple-400 hover:to-orange-400 text-slate-900 border-0 font-semibold"
+                        : ""
+                    }
+                  >
+                    {isPlaying ? "Active" : "Paused"}
+                  </Badge>
                 </div>
               </div>
 
@@ -207,8 +208,8 @@ export function SimulatorConfig() {
                     </Button>
                   ))}
                 </div>
-                <DemandPressureConfig />
               </div>
+                <DemandPressureConfig />
             </div>
 
             <Separator />
@@ -239,6 +240,25 @@ export function SimulatorConfig() {
                       }
                     />
                   </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Collateral Token</Label>
+                  <Select
+                    value={config.collateralToken}
+                    onValueChange={(value) =>
+                      updateConfig({ collateralToken: value as "USDC" | "ETH" | "wETH" })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select collateral token" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="USDC">USDC</SelectItem>
+                      <SelectItem value="ETH">ETH</SelectItem>
+                      <SelectItem value="wETH">wETH</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="space-y-2">
