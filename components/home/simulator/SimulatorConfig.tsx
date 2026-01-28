@@ -31,18 +31,29 @@ import { LBPConfig } from "@/lib/lbp-math";
 import { useShallow } from "zustand/shallow";
 
 export function SimulatorConfig() {
-  const { config, updateConfig, isPlaying, setIsPlaying, resetConfig, simulationSpeed, setSimulationSpeed } =
-    useSimulatorStore(
-      useShallow((state) => ({
-        config: state.config,
-        updateConfig: state.updateConfig,
-        isPlaying: state.isPlaying,
-        setIsPlaying: state.setIsPlaying,
-        resetConfig: state.resetConfig,
-        simulationSpeed: state.simulationSpeed,
-        setSimulationSpeed: state.setSimulationSpeed,
-      })),
-    );
+  const {
+    config,
+    updateConfig,
+    isPlaying,
+    setIsPlaying,
+    resetConfig,
+    simulationSpeed,
+    setSimulationSpeed,
+    isConfigOpen,
+    setIsConfigOpen,
+  } = useSimulatorStore(
+    useShallow((state) => ({
+      config: state.config,
+      updateConfig: state.updateConfig,
+      isPlaying: state.isPlaying,
+      setIsPlaying: state.setIsPlaying,
+      resetConfig: state.resetConfig,
+      simulationSpeed: state.simulationSpeed,
+      setSimulationSpeed: state.setSimulationSpeed,
+      isConfigOpen: state.isConfigOpen,
+      setIsConfigOpen: state.setIsConfigOpen,
+    })),
+  );
 
   // Local state for immediate UI updates (for sliders/inputs that trigger expensive recalculations)
   const [localDuration, setLocalDuration] = useState(config.duration);
@@ -119,7 +130,7 @@ export function SimulatorConfig() {
   };
 
   return (
-    <Sheet>
+    <Sheet open={isConfigOpen} onOpenChange={setIsConfigOpen}>
       <SheetTrigger asChild>
         <Button
           variant="secondary"

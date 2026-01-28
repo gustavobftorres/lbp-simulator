@@ -47,10 +47,14 @@ interface SimulatorState {
   // Simulation Speed
   simulationSpeed: number; // Speed multiplier (1x, 10x, 25x, 50x)
 
+  // UI State
+  isConfigOpen: boolean;
+
   // Actions
   updateConfig: (partialConfig: Partial<LBPConfig>) => void;
   setIsPlaying: (isPlaying: boolean) => void;
   setSimulationSpeed: (speed: number) => void;
+  setIsConfigOpen: (open: boolean) => void;
   updateDemandPressureConfig: (config: Partial<DemandPressureConfig>) => void;
   resetConfig: () => void;
   tick: () => void;
@@ -108,6 +112,9 @@ export const useSimulatorStore = create<SimulatorState>((set, get) => ({
 
   // Simulation speed (default 1x)
   simulationSpeed: 1,
+
+  // UI State
+  isConfigOpen: false,
 
   updateConfig: (partialConfig) => {
     const currentConfig = get().config;
@@ -178,6 +185,10 @@ export const useSimulatorStore = create<SimulatorState>((set, get) => ({
     } else {
       set({ simulationSpeed: speed });
     }
+  },
+
+  setIsConfigOpen: (open: boolean) => {
+    set({ isConfigOpen: open });
   },
 
   updateDemandPressureConfig: (partialConfig: Partial<DemandPressureConfig>) => {
