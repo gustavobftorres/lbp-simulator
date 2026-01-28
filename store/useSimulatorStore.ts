@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import { shallow } from "zustand/shallow";
 import {
   calculateSimulationData,
   LBPConfig,
@@ -8,7 +7,6 @@ import {
   calculateOutGivenIn,
   getDemandCurve,
   getDemandPressureCurve,
-  calculateTradingVolume,
   DemandPressureConfig,
   DEFAULT_DEMAND_PRESSURE_CONFIG,
 } from "@/lib/lbp-math";
@@ -589,9 +587,7 @@ export const useSimulatorStore = create<SimulatorState>((set, get) => ({
       currentStep,
       totalSteps,
       simulationData,
-      demandCurve,
       demandPressureCurve,
-      demandPressureConfig,
       setIsPlaying,
       limitOrders,
       twapOrders,
@@ -608,44 +604,13 @@ export const useSimulatorStore = create<SimulatorState>((set, get) => ({
       set({ currentStep: nextStep });
     }
 
-    // 2. DEMAND PRESSURE DRIVEN BOT LOGIC
+    // 2. BUY PRESSURE BOT LOGIC (per-step USDC flow)
     const currentData = simulationData[nextStep];
-    const fairPrice = demandCurve[nextStep];
     const currentPrice = currentData.price;
-    const demandPressure = demandPressureCurve[nextStep];
-
-    // Calculate price discount (how much below fair value)
-    const priceDiscount = currentPrice < fairPrice 
-      ? (fairPrice - currentPrice) / fairPrice 
-      : 0;
-
-    // Calculate expected trading volume based on demand pressure
-    const baseVolume = calculateTradingVolume(
-      demandPressure,
-      priceDiscount,
-      demandPressureConfig,
-    );
-
-    // Determine number of swaps based on volume (Poisson-like distribution)
-    // Higher volume = more likely to have swaps, and potentially multiple swaps
-    const swapProbability = Math.min(1, baseVolume * 0.3); // Scale probability
-    const numSwaps = Math.random() < swapProbability 
-      ? Math.floor(baseVolume * 2) + 1 // At least 1 swap if probability hits
-      : 0;
-
-    // Generate swaps based on demand pressure
-    for (let i = 0; i < numSwaps; i++) {
-      // Trade size varies based on demand pressure and config
-      const sizeMultiplier = 1 + Math.random() * demandPressureConfig.tradeSizeVariation;
-      const tradeSize = demandPressureConfig.baseTradeSize * sizeMultiplier * demandPressure;
-      
-      // Only buy when price is below fair value (arbitrage opportunity)
-      if (currentPrice < fairPrice) {
-        get()._processPoolBuy(tradeSize);
-      } else if (Math.random() < 0.05) {
-        // Small chance of noise trades even when price is above fair value
-        get()._processPoolBuy(tradeSize * 0.1);
-      }
+    const flowUSDC = demandPressureCurve[nextStep] || 0;
+    if (flowUSDC > 0) {
+      // Execute a deterministic buy each step based on the configured buy flow curve.
+      get()._processPoolBuy(flowUSDC);
     }
 
     // 3. Execute user limit orders when conditions are met
@@ -709,7 +674,6 @@ export const useSimulatorStore = create<SimulatorState>((set, get) => ({
 
         // Determine how much to spend this part
         const idealPerPart = order.totalCollateral / order.numParts;
-        const remainingParts = order.numParts - order.partsExecuted;
         const maxThisPart = Math.min(idealPerPart, order.remainingCollateral);
 
         // Ensure user has enough balance for this slice

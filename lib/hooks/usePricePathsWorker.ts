@@ -23,12 +23,9 @@ function createConfigKey(config: LBPConfig): string {
 
 function createDemandConfigKey(config: DemandPressureConfig): string {
   return JSON.stringify({
-    baseIntensity: config.baseIntensity,
-    floorIntensity: config.floorIntensity,
-    growthRate: config.growthRate,
-    priceDiscountMultiplier: config.priceDiscountMultiplier,
-    baseTradeSize: config.baseTradeSize,
-    tradeSizeVariation: config.tradeSizeVariation,
+    preset: config.preset,
+    magnitudeBase: config.magnitudeBase,
+    multiplier: config.multiplier,
   });
 }
 
