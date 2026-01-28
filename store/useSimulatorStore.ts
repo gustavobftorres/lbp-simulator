@@ -24,10 +24,39 @@ export interface Swap {
   direction: "buy" | "sell"; // buy = USDC -> Token, sell = Token -> USDC
 }
 
+export interface LimitOrder {
+  id: string;
+  type: "buy";
+  triggerPrice: number; // Price in collateral token per project token
+  collateralAmount: number; // Max collateral to spend when triggered
+  status: "open" | "filled" | "cancelled";
+  createdAt: number;
+  filledAt?: number;
+}
+
+export interface TwapOrder {
+  id: string;
+  type: "buy";
+  totalCollateral: number;
+  remainingCollateral: number;
+  numParts: number;
+  partsExecuted: number;
+  totalDurationHours: number;
+  partDurationSteps: number;
+  nextExecutionStep: number;
+  priceProtectionPct: number;
+  referencePrice: number;
+  status: "open" | "completed" | "cancelled";
+  createdAt: number;
+  completedAt?: number;
+}
+
 interface SimulatorState {
   config: LBPConfig;
   simulationData: SimulationStep[];
   swaps: Swap[];
+  limitOrders: LimitOrder[];
+  twapOrders: TwapOrder[];
   isPlaying: boolean;
   currentStep: number;
   totalSteps: number;
@@ -47,16 +76,34 @@ interface SimulatorState {
   // Simulation Speed
   simulationSpeed: number; // Speed multiplier (1x, 10x, 25x, 50x)
 
+  // UI State
+  isConfigOpen: boolean;
+
   // Actions
   updateConfig: (partialConfig: Partial<LBPConfig>) => void;
   setIsPlaying: (isPlaying: boolean) => void;
   setSimulationSpeed: (speed: number) => void;
+  setIsConfigOpen: (open: boolean) => void;
   updateDemandPressureConfig: (config: Partial<DemandPressureConfig>) => void;
   resetConfig: () => void;
   tick: () => void;
   processBuy: (amountUSDC: number) => void;
   processSell: (amountToken: number) => void;
   updateUserBalance: (tknDelta: number, usdcDelta: number) => void;
+  createLimitOrder: (order: {
+    type: "buy";
+    triggerPrice: number;
+    collateralAmount: number;
+  }) => void;
+  cancelLimitOrder: (id: string) => void;
+  createTwapOrder: (order: {
+    type: "buy";
+    totalCollateral: number;
+    numParts: number;
+    totalDurationHours: number;
+    priceProtectionPct: number;
+  }) => void;
+  cancelTwapOrder: (id: string) => void;
   // Internal functions for bot trades (don't affect user wallet)
   _processPoolBuy: (amountUSDC: number, account?: string) => void;
   _processPoolSell: (amountToken: number, account?: string) => void;
@@ -87,6 +134,8 @@ export const useSimulatorStore = create<SimulatorState>((set, get) => ({
   config: DEFAULT_CONFIG,
   simulationData: calculateSimulationData(DEFAULT_CONFIG, TOTAL_STEPS),
   swaps: [],
+  limitOrders: [],
+  twapOrders: [],
   isPlaying: false,
   currentStep: 0, // Start before step 0
   totalSteps: TOTAL_STEPS,
@@ -108,6 +157,9 @@ export const useSimulatorStore = create<SimulatorState>((set, get) => ({
 
   // Simulation speed (default 1x)
   simulationSpeed: 1,
+
+  // UI State
+  isConfigOpen: false,
 
   updateConfig: (partialConfig) => {
     const currentConfig = get().config;
@@ -180,6 +232,10 @@ export const useSimulatorStore = create<SimulatorState>((set, get) => ({
     }
   },
 
+  setIsConfigOpen: (open: boolean) => {
+    set({ isConfigOpen: open });
+  },
+
   updateDemandPressureConfig: (partialConfig: Partial<DemandPressureConfig>) => {
     const { demandPressureConfig, config } = get();
     const newConfig = { ...demandPressureConfig, ...partialConfig };
@@ -203,6 +259,8 @@ export const useSimulatorStore = create<SimulatorState>((set, get) => ({
       config: DEFAULT_CONFIG,
       simulationData: calculateSimulationData(DEFAULT_CONFIG, TOTAL_STEPS),
       swaps: [],
+      limitOrders: [],
+      twapOrders: [],
       isPlaying: false,
       currentStep: 0,
       currentTknBalance: DEFAULT_CONFIG.tknBalanceIn,
@@ -438,6 +496,94 @@ export const useSimulatorStore = create<SimulatorState>((set, get) => ({
     });
   },
 
+  createLimitOrder: ({ type, triggerPrice, collateralAmount }) => {
+    if (type !== "buy" || triggerPrice <= 0 || collateralAmount <= 0) return;
+
+    const newOrder: LimitOrder = {
+      id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+      type,
+      triggerPrice,
+      collateralAmount,
+      status: "open",
+      createdAt: Date.now(),
+    };
+
+    set((state) => ({
+      limitOrders: [...state.limitOrders, newOrder],
+    }));
+  },
+
+  cancelLimitOrder: (id: string) => {
+    set((state) => ({
+      limitOrders: state.limitOrders.map((order) =>
+        order.id === id && order.status === "open"
+          ? { ...order, status: "cancelled" }
+          : order,
+      ),
+    }));
+  },
+
+  createTwapOrder: ({
+    type,
+    totalCollateral,
+    numParts,
+    totalDurationHours,
+    priceProtectionPct,
+  }) => {
+    if (
+      type !== "buy" ||
+      totalCollateral <= 0 ||
+      numParts < 1 ||
+      totalDurationHours <= 0
+    ) {
+      return;
+    }
+
+    const { config, currentStep, simulationData } = get();
+    const stepsPerHour = TOTAL_STEPS / config.duration;
+    const totalDurationSteps = Math.max(
+      1,
+      Math.round(totalDurationHours * stepsPerHour),
+    );
+    const partDurationSteps = Math.max(
+      1,
+      Math.round(totalDurationSteps / numParts),
+    );
+
+    const stepData = simulationData[currentStep] || simulationData[0];
+    const referencePrice = stepData?.price ?? 0;
+
+    const newOrder: TwapOrder = {
+      id: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+      type,
+      totalCollateral,
+      remainingCollateral: totalCollateral,
+      numParts,
+      partsExecuted: 0,
+      totalDurationHours,
+      partDurationSteps,
+      nextExecutionStep: currentStep + partDurationSteps,
+      priceProtectionPct,
+      referencePrice,
+      status: "open",
+      createdAt: Date.now(),
+    };
+
+    set((state) => ({
+      twapOrders: [...state.twapOrders, newOrder],
+    }));
+  },
+
+  cancelTwapOrder: (id: string) => {
+    set((state) => ({
+      twapOrders: state.twapOrders.map((order) =>
+        order.id === id && order.status === "open"
+          ? { ...order, status: "cancelled", completedAt: Date.now() }
+          : order,
+      ),
+    }));
+  },
+
   tick: () => {
     const {
       currentStep,
@@ -447,6 +593,8 @@ export const useSimulatorStore = create<SimulatorState>((set, get) => ({
       demandPressureCurve,
       demandPressureConfig,
       setIsPlaying,
+      limitOrders,
+      twapOrders,
     } = get();
 
     if (currentStep >= totalSteps - 1) {
@@ -498,6 +646,97 @@ export const useSimulatorStore = create<SimulatorState>((set, get) => ({
         // Small chance of noise trades even when price is above fair value
         get()._processPoolBuy(tradeSize * 0.1);
       }
+    }
+
+    // 3. Execute user limit orders when conditions are met
+    if (limitOrders.length > 0) {
+      const updatedOrders: LimitOrder[] = limitOrders.map((order) => {
+        if (order.status !== "open") return order;
+
+        // Only buy-type limit orders are currently supported
+        if (order.type === "buy" && currentPrice <= order.triggerPrice) {
+          const { userUsdcBalance } = get();
+
+          if (userUsdcBalance >= order.collateralAmount) {
+            // Execute a simulated buy using existing logic
+            get().processBuy(order.collateralAmount);
+
+            const filledOrder: LimitOrder = {
+              ...order,
+              status: "filled",
+              filledAt: Date.now(),
+            };
+            return filledOrder;
+          }
+        }
+
+        return order;
+      });
+
+      set({ limitOrders: updatedOrders });
+    }
+
+    // 4. Execute TWAP orders on schedule with price protection
+    if (twapOrders.length > 0) {
+      const { userUsdcBalance } = get();
+
+      const updatedTwapOrders: TwapOrder[] = twapOrders.map((order) => {
+        if (order.status !== "open") return order;
+
+        // Check schedule
+        if (nextStep < order.nextExecutionStep) {
+          return order;
+        }
+
+        if (order.remainingCollateral <= 0 || order.partsExecuted >= order.numParts) {
+          return {
+            ...order,
+            status: "completed",
+            completedAt: order.completedAt ?? Date.now(),
+          };
+        }
+
+        // Price protection: don't execute if price has moved above allowed threshold
+        const maxAllowedPrice =
+          order.referencePrice * (1 + order.priceProtectionPct / 100);
+        if (currentPrice > maxAllowedPrice) {
+          // Skip this tick, schedule next attempt at same cadence
+          return {
+            ...order,
+            nextExecutionStep: nextStep + order.partDurationSteps,
+          };
+        }
+
+        // Determine how much to spend this part
+        const idealPerPart = order.totalCollateral / order.numParts;
+        const remainingParts = order.numParts - order.partsExecuted;
+        const maxThisPart = Math.min(idealPerPart, order.remainingCollateral);
+
+        // Ensure user has enough balance for this slice
+        const spendThisPart = Math.min(maxThisPart, userUsdcBalance);
+        if (spendThisPart <= 0) {
+          return order;
+        }
+
+        // Execute as a normal buy
+        get().processBuy(spendThisPart);
+
+        const newRemaining = order.remainingCollateral - spendThisPart;
+        const newPartsExecuted = order.partsExecuted + 1;
+        const isCompleted =
+          newRemaining <= 0 || newPartsExecuted >= order.numParts || nextStep >= totalSteps - 1;
+
+        return {
+          ...order,
+          remainingCollateral: newRemaining,
+          partsExecuted: newPartsExecuted,
+          nextExecutionStep: nextStep + order.partDurationSteps,
+          status: isCompleted ? "completed" : "open",
+          completedAt: isCompleted ? Date.now() : order.completedAt,
+        };
+      });
+
+      set({ twapOrders: updatedTwapOrders });
     }
   },
 }));
