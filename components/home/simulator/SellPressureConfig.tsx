@@ -28,11 +28,11 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, memo } from "react";
 import { useDebounce } from "@/lib/useDebounce";
 import { useShallow } from "zustand/react/shallow";
 
-export function SellPressureConfig() {
+function SellPressureConfigComponent() {
   const { sellPressureConfig, updateSellPressureConfig, config } =
     useSimulatorStore(
       useShallow((state) => ({
@@ -346,4 +346,6 @@ export function SellPressureConfig() {
     </Dialog>
   );
 }
+
+export const SellPressureConfig = memo(SellPressureConfigComponent);
 

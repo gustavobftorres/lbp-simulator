@@ -31,7 +31,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, memo } from "react";
 import {
   getCumulativeBuyPressureCurve,
   DemandPressureConfig as DemandPressureConfigType,
@@ -41,7 +41,7 @@ import { useShallow } from "zustand/react/shallow";
 import { GiBull } from "react-icons/gi";
 import { GiBearFace } from "react-icons/gi";
 
-export function DemandPressureConfig() {
+function DemandPressureConfigComponent() {
   const { demandPressureConfig, updateDemandPressureConfig, config } =
     useSimulatorStore(
       useShallow((state) => ({
@@ -288,3 +288,5 @@ export function DemandPressureConfig() {
     </Dialog>
   );
 }
+
+export const DemandPressureConfig = memo(DemandPressureConfigComponent);
