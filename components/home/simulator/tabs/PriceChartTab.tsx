@@ -11,7 +11,7 @@ import {
   ResponsiveContainer,
   Legend,
 } from "recharts";
-import { memo } from "react";
+import { memo, useMemo } from "react";
 
 interface PriceChartTabProps {
   chartData: any[];
@@ -31,17 +31,30 @@ function PriceChartTabComponent({
   const { resolvedTheme } = useTheme();
   const axisLabelColor = resolvedTheme === "dark" ? "#b3b3b3" : "#6b7280";
 
-  // Filter chart data to only show up to currentStep
-  // If currentStep is 0 (not started), show all data
-  const filteredChartData = currentStep > 0
-    ? chartData.filter((d) => (d.index ?? 0) <= currentStep)
-    : chartData;
+  const displayData = useMemo(() => {
+    const step = currentStep ?? 0;
+
+    return chartData.map((d) => {
+      const idx = d.index ?? 0;
+
+      const show = step === 0 ? true : idx <= step;
+
+      return {
+        ...d,
+        price: show ? d.price : null,
+
+        potentialPathLow: !isPlaying ? d.potentialPathLow : null,
+        potentialPathMedium: !isPlaying ? d.potentialPathMedium : null,
+        potentialPathHigh: !isPlaying ? d.potentialPathHigh : null,
+      };
+    });
+  }, [chartData, currentStep, isPlaying]);
 
   return (
     <>
       <ResponsiveContainer width="100%" height="95%">
         <LineChart
-          data={filteredChartData}
+          data={displayData}
           margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
         >
           <CartesianGrid
