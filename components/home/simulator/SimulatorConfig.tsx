@@ -71,6 +71,13 @@ function SimulatorConfigComponent() {
       setLocalTotalSupply(config.totalSupply);
       setLocalUsdcBalanceIn(config.usdcBalanceIn);
     }
+
+    if (typeof window !== "undefined") {
+      const el = document.getElementById("lbp-settings");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
   };
 
   // Local state for immediate UI updates (for sliders/inputs that trigger expensive recalculations)
